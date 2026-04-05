@@ -63,3 +63,30 @@ def test_features_command_writes_feature_csv(tmp_path: Path) -> None:
     assert len(rows) == 2
     assert rows[0]["symbol"] == "AAPL"
     assert rows[1]["rolling_mean_3"] == ""
+
+
+def test_ingest_command_writes_normalized_rows(tmp_path: Path) -> None:
+    source = tmp_path / "bars.csv"
+    output = tmp_path / "normalized.csv"
+    _write_input_csv(source)
+
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "market_data_toolkit.cli",
+            "ingest",
+            str(source),
+            "--output",
+            str(output),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    with output.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+
+    assert len(rows) == 2
+    assert rows[0]["timestamp"] == "2025-01-02T09:30:00"
