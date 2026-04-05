@@ -9,6 +9,7 @@ from typing import Sequence
 from market_data_toolkit.features import FeatureRow, compute_features
 from market_data_toolkit.io import REQUIRED_COLUMNS, export_dataset, load_data
 from market_data_toolkit.normalize import normalize_bars
+from market_data_toolkit.validation import summarize_dataset
 
 
 def main() -> None:
@@ -43,9 +44,12 @@ def _run_ingest(source: Path, output: Path) -> None:
 def _run_validate(source: Path) -> None:
     bars = load_data(source)
     normalized = normalize_bars(bars)
+    summary = summarize_dataset(bars, normalized)
     print(
-        f"Validated {len(bars)} rows. Required columns: {', '.join(REQUIRED_COLUMNS)}. "
-        f"Normalized row count: {len(normalized)}."
+        f"Validated {summary.row_count} rows across {summary.symbol_count} symbols. "
+        f"Required columns: {', '.join(REQUIRED_COLUMNS)}. "
+        f"Normalized row count: {summary.normalized_row_count}. "
+        f"Window: {summary.start_timestamp} -> {summary.end_timestamp}."
     )
 
 

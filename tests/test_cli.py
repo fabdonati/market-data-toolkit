@@ -31,8 +31,10 @@ def test_validate_command_reports_counts(tmp_path: Path) -> None:
         text=True,
     )
 
-    assert "Validated 3 rows" in result.stdout
+    assert "Validated 3 rows across 1 symbols" in result.stdout
     assert "Normalized row count: 2" in result.stdout
+    assert "Window: 2025-01-02 09:30:00 -> 2025-01-02 09:31:00" in result.stdout
+
 
 
 def test_features_command_writes_feature_csv(tmp_path: Path) -> None:
@@ -61,4 +63,3 @@ def test_features_command_writes_feature_csv(tmp_path: Path) -> None:
     assert len(rows) == 2
     assert rows[0]["symbol"] == "AAPL"
     assert rows[1]["rolling_mean_3"] == ""
-
