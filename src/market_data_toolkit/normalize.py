@@ -9,7 +9,8 @@ from market_data_toolkit.models import Bar
 
 def normalize_bars(bars: Iterable[Bar]) -> list[Bar]:
     grouped: dict[tuple[str, datetime], Bar] = {}
-    for bar in bars:
+    ordered_bars = sorted(bars, key=lambda item: (item.symbol.upper(), item.timestamp))
+    for bar in ordered_bars:
         key = (bar.symbol.upper(), bar.timestamp.replace(second=0, microsecond=0))
         if key in grouped:
             grouped[key] = _merge_bars(grouped[key], bar)

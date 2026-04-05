@@ -40,6 +40,17 @@ def test_resample_bars_builds_2_minute_buckets(sample_bars: list[Bar]) -> None:
     assert resampled[0].volume == pytest.approx(3000.0)
 
 
+def test_normalize_bars_uses_latest_close_for_out_of_order_ticks() -> None:
+    bars = [
+        Bar("AAPL", datetime.fromisoformat("2025-01-02T09:30:40"), 100.5, 102, 100, 101.25, 1200),
+        Bar("AAPL", datetime.fromisoformat("2025-01-02T09:30:05"), 100, 101, 99, 100.5, 1000),
+    ]
+
+    normalized = normalize_bars(bars)
+
+    assert normalized[0].close == pytest.approx(101.25)
+
+
 def test_compute_features_generates_rolling_fields(sample_bars: list[Bar]) -> None:
     normalized = normalize_bars(sample_bars)
     feature_rows = compute_features(normalized)
