@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Sequence
 
 from market_data_toolkit.features import FeatureRow, compute_features
+from market_data_toolkit.ibkr import load_ibkr_historical_data
 from market_data_toolkit.io import REQUIRED_COLUMNS, export_dataset, load_data
 from market_data_toolkit.normalize import normalize_bars
 from market_data_toolkit.validation import summarize_dataset
@@ -20,6 +21,14 @@ def main() -> None:
     ingest.add_argument("source", type=Path)
     ingest.add_argument("--output", type=Path, required=True)
 
+    ibkr_ingest = subparsers.add_parser(
+        "ibkr-ingest",
+        help="Normalize an IBKR historical-data CSV export into the toolkit format.",
+    )
+    ibkr_ingest.add_argument("source", type=Path)
+    ibkr_ingest.add_argument("--output", type=Path, required=True)
+    ibkr_ingest.add_argument("--symbol", type=str)
+
     validate = subparsers.add_parser("validate", help="Validate a CSV dataset.")
     validate.add_argument("source", type=Path)
 
@@ -30,6 +39,8 @@ def main() -> None:
     args = parser.parse_args()
     if args.command == "ingest":
         _run_ingest(args.source, args.output)
+    elif args.command == "ibkr-ingest":
+        _run_ibkr_ingest(args.source, args.output, args.symbol)
     elif args.command == "validate":
         _run_validate(args.source)
     else:
@@ -39,6 +50,11 @@ def main() -> None:
 def _run_ingest(source: Path, output: Path) -> None:
     export_dataset(output, normalize_bars(load_data(source)))
     print(f"Wrote normalized dataset to {output}")
+
+
+def _run_ibkr_ingest(source: Path, output: Path, symbol: str | None) -> None:
+    export_dataset(output, normalize_bars(load_ibkr_historical_data(source, symbol=symbol)))
+    print(f"Wrote normalized IBKR dataset to {output}")
 
 
 def _run_validate(source: Path) -> None:

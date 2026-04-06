@@ -90,3 +90,42 @@ def test_ingest_command_writes_normalized_rows(tmp_path: Path) -> None:
 
     assert len(rows) == 2
     assert rows[0]["timestamp"] == "2025-01-02T09:30:00"
+
+
+def test_ibkr_ingest_command_normalizes_ibkr_exports(tmp_path: Path) -> None:
+    source = tmp_path / "ibkr.csv"
+    output = tmp_path / "normalized.csv"
+    source.write_text(
+        "\n".join(
+            [
+                "Date,Open,High,Low,Close,Volume,Average,BarCount",
+                "20250102 09:30:12,100,101,99,100.5,1000,100.2,45",
+                "20250102 09:30:55,100.5,102,100,101.25,1200,101.1,50",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "market_data_toolkit.cli",
+            "ibkr-ingest",
+            str(source),
+            "--symbol",
+            "AAPL",
+            "--output",
+            str(output),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    with output.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+
+    assert len(rows) == 1
+    assert rows[0]["symbol"] == "AAPL"
+    assert rows[0]["timestamp"] == "2025-01-02T09:30:00"
