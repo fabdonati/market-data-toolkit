@@ -53,6 +53,7 @@ mdtk ibkr-ingest data/ibkr_aapl.csv --symbol AAPL --output data/normalized.csv
 ```
 
 If the IBKR export already includes a `symbol` column, `--symbol` is optional.
+If it does not, treat the file as a single-symbol export and run the import once per symbol file.
 
 ## Package usage
 
