@@ -46,6 +46,14 @@ Compute features:
 mdtk features data/raw.csv --output data/features.csv
 ```
 
+Convert an IBKR historical-data export into the toolkit schema:
+
+```bash
+mdtk ibkr-ingest data/ibkr_aapl.csv --symbol AAPL --output data/normalized.csv
+```
+
+If the IBKR export already includes a `symbol` column, `--symbol` is optional.
+
 ## Package usage
 
 ```python
@@ -67,3 +75,4 @@ features = compute_features(normalized)
 - v0.1.0 is focused on CSV-based OHLCV data
 - Feature generation is intentionally simple and transparent
 - Corporate actions and trading-calendar logic are not included yet
+- The IBKR adapter currently targets historical bar exports, not streaming API callbacks

@@ -43,6 +43,23 @@ The CLI mirrors the package API rather than inventing a separate execution model
 - `mdtk validate`
 - `mdtk ingest`
 - `mdtk features`
+- `mdtk ibkr-ingest`
 
 That keeps it easy to verify behavior in tests and reuse the same logic from notebooks or
 other packages.
+
+## Broker-specific adapters
+
+Vendor-specific loaders should convert raw source files into the same generic `Bar` schema used
+everywhere else in the repo. The current IBKR adapter assumes a historical-bar CSV with the
+standard bar fields:
+
+- `Date`
+- `Open`
+- `High`
+- `Low`
+- `Close`
+- `Volume`
+
+Optional columns such as `Average`, `BarCount`, and `symbol` are ignored unless symbol
+information is needed during import.
