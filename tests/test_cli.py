@@ -129,3 +129,21 @@ def test_ibkr_ingest_command_normalizes_ibkr_exports(tmp_path: Path) -> None:
     assert len(rows) == 1
     assert rows[0]["symbol"] == "AAPL"
     assert rows[0]["timestamp"] == "2025-01-02T09:30:00"
+
+
+def test_ibkr_fetch_command_requires_symbols_argument() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "market_data_toolkit.cli",
+            "ibkr-fetch",
+            "--output",
+            "dummy.csv",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0
+    assert "--symbols" in result.stderr

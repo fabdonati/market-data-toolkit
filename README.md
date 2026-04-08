@@ -55,6 +55,19 @@ mdtk ibkr-ingest data/ibkr_aapl.csv --symbol AAPL --output data/normalized.csv
 If the IBKR export already includes a `symbol` column, `--symbol` is optional.
 If it does not, treat the file as a single-symbol export and run the import once per symbol file.
 
+Fetch IBKR historical bars directly from TWS / IB Gateway:
+
+```bash
+python -m pip install -e ".[ibkr,dev]"
+mdtk ibkr-fetch --symbols AAPL,MSFT --duration "1 Y" --bar-size "1 day" --output data/portfolio.csv
+```
+
+This requires:
+
+- TWS or IB Gateway running locally
+- API access enabled
+- the correct host / port / client id for your IBKR session
+
 ## Package usage
 
 ```python
@@ -77,3 +90,4 @@ features = compute_features(normalized)
 - Feature generation is intentionally simple and transparent
 - Corporate actions and trading-calendar logic are not included yet
 - The IBKR adapter currently targets historical bar exports, not streaming API callbacks
+- Direct IBKR fetching currently assumes stock contracts (`secType=STK`) on the selected exchange

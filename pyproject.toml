@@ -15,6 +15,9 @@ authors = [
 dependencies = []
 
 [project.optional-dependencies]
+ibkr = [
+  "ibapi>=9.81.1"
+]
 dev = [
   "mypy>=1.11",
   "pytest>=8.3",
@@ -41,4 +44,3 @@ select = ["E", "F", "I", "B"]
 python_version = "3.11"
 strict = true
 packages = ["market_data_toolkit"]
-
