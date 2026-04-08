@@ -68,6 +68,14 @@ This requires:
 - API access enabled
 - the correct host / port / client id for your IBKR session
 
+Combine multiple normalized datasets into one portfolio-ready CSV:
+
+```bash
+mdtk combine data/aapl.csv data/msft.csv data/nvda.csv --output data/portfolio.csv
+```
+
+The combined output is sorted by `symbol` and `timestamp`, and exact duplicate rows are rejected.
+
 ## Package usage
 
 ```python

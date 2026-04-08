@@ -8,7 +8,7 @@ from typing import Sequence
 
 from market_data_toolkit.features import FeatureRow, compute_features
 from market_data_toolkit.ibkr import fetch_ibkr_historical_data, load_ibkr_historical_data
-from market_data_toolkit.io import REQUIRED_COLUMNS, export_dataset, load_data
+from market_data_toolkit.io import REQUIRED_COLUMNS, combine_datasets, export_dataset, load_data
 from market_data_toolkit.normalize import normalize_bars
 from market_data_toolkit.validation import summarize_dataset
 
@@ -47,6 +47,13 @@ def main() -> None:
     ibkr_fetch.add_argument("--timeout-seconds", type=float, default=15.0)
     ibkr_fetch.add_argument("--include-extended-hours", action="store_true")
 
+    combine = subparsers.add_parser(
+        "combine",
+        help="Merge multiple normalized toolkit datasets into one portfolio-ready CSV.",
+    )
+    combine.add_argument("sources", nargs="+", type=Path)
+    combine.add_argument("--output", type=Path, required=True)
+
     validate = subparsers.add_parser("validate", help="Validate a CSV dataset.")
     validate.add_argument("source", type=Path)
 
@@ -61,6 +68,8 @@ def main() -> None:
         _run_ibkr_ingest(args.source, args.output, args.symbol)
     elif args.command == "ibkr-fetch":
         _run_ibkr_fetch(args)
+    elif args.command == "combine":
+        _run_combine(args.sources, args.output)
     elif args.command == "validate":
         _run_validate(args.source)
     else:
@@ -95,6 +104,12 @@ def _run_ibkr_fetch(args: argparse.Namespace) -> None:
     )
     export_dataset(args.output, bars)
     print(f"Wrote {len(bars)} fetched IBKR bars to {args.output}")
+
+
+def _run_combine(sources: Sequence[Path], output: Path) -> None:
+    combined = combine_datasets(sources)
+    export_dataset(output, combined)
+    print(f"Wrote {len(combined)} combined rows to {output}")
 
 
 def _run_validate(source: Path) -> None:

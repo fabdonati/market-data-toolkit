@@ -67,3 +67,6 @@ information is needed during import.
 For direct historical fetches, the toolkit follows the same principle: request broker-specific
 data through IBKR's API, convert the returned bars into the generic `Bar` model, and export the
 result as a normalized CSV that downstream tools can consume without broker-specific logic.
+
+When working with multiple symbols, the toolkit keeps each normalized dataset schema-identical so
+they can be merged deterministically into a single portfolio-ready file for downstream research.

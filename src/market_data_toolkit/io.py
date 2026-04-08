@@ -47,6 +47,30 @@ def export_dataset(path: str | Path, bars: Iterable[Bar]) -> None:
             )
 
 
+def combine_datasets(paths: Iterable[str | Path]) -> list[Bar]:
+    bars_by_key: dict[tuple[str, datetime, float, float, float, float, float], Bar] = {}
+    for raw_path in paths:
+        dataset_path = Path(raw_path)
+        for bar in load_data(dataset_path):
+            key = (
+                bar.symbol,
+                bar.timestamp,
+                bar.open,
+                bar.high,
+                bar.low,
+                bar.close,
+                bar.volume,
+            )
+            if key in bars_by_key:
+                raise ValueError(
+                    "Duplicate row detected while combining datasets: "
+                    f"{bar.symbol} @ {bar.timestamp.isoformat()}"
+                )
+            bars_by_key[key] = bar
+
+    return sorted(bars_by_key.values(), key=lambda bar: (bar.symbol, bar.timestamp))
+
+
 def _row_to_bar(row: dict[str, str | None]) -> Bar:
     timestamp_raw = _required_value(row, "timestamp")
     return Bar(
@@ -65,4 +89,3 @@ def _required_value(row: dict[str, str | None], key: str) -> str:
     if value is None or value == "":
         raise ValueError(f"Missing required value for column '{key}'.")
     return value
-

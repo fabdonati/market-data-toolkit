@@ -147,3 +147,50 @@ def test_ibkr_fetch_command_requires_symbols_argument() -> None:
 
     assert result.returncode != 0
     assert "--symbols" in result.stderr
+
+
+def test_combine_command_writes_merged_dataset(tmp_path: Path) -> None:
+    first = tmp_path / "aapl.csv"
+    second = tmp_path / "msft.csv"
+    output = tmp_path / "portfolio.csv"
+    first.write_text(
+        "\n".join(
+            [
+                "symbol,timestamp,open,high,low,close,volume",
+                "AAPL,2025-01-02T00:00:00,99,101,98,100,1000",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    second.write_text(
+        "\n".join(
+            [
+                "symbol,timestamp,open,high,low,close,volume",
+                "MSFT,2025-01-02T00:00:00,199,201,198,200,900",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "market_data_toolkit.cli",
+            "combine",
+            str(first),
+            str(second),
+            "--output",
+            str(output),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    with output.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+
+    assert len(rows) == 2
+    assert rows[0]["symbol"] == "AAPL"
+    assert rows[1]["symbol"] == "MSFT"
