@@ -116,11 +116,17 @@ def _run_validate(source: Path) -> None:
     bars = load_data(source)
     normalized = normalize_bars(bars)
     summary = summarize_dataset(bars, normalized)
+    non_monotonic_symbols = (
+        ", ".join(summary.non_monotonic_symbols) if summary.non_monotonic_symbols else "NONE"
+    )
     print(
         f"Validated {summary.row_count} rows across {summary.symbol_count} symbols. "
         f"Required columns: {', '.join(REQUIRED_COLUMNS)}. "
         f"Normalized row count: {summary.normalized_row_count}. "
-        f"Window: {summary.start_timestamp} -> {summary.end_timestamp}."
+        f"Window: {summary.start_timestamp} -> {summary.end_timestamp}. "
+        f"Duplicate minute buckets: {summary.duplicate_minute_bucket_count}. "
+        f"Daily session gaps: {summary.daily_session_gap_count}. "
+        f"Non-monotonic symbols: {non_monotonic_symbols}."
     )
 
 

@@ -15,8 +15,8 @@ a small CLI.
 - Load OHLCV data from CSV into typed bar objects
 - Normalize duplicate timestamps into canonical minute bars
 - Resample bars into coarser intervals
-- Generate simple derived features such as returns and rolling means
-- Validate and export datasets from the command line
+- Generate derived features such as returns, gap returns, rolling means, rolling volatility, volume ratios, and drawdown
+- Validate duplicate minute buckets, daily session gaps, and non-monotonic symbol ordering from the command line
 
 ## Install
 
@@ -33,6 +33,12 @@ Validate a dataset:
 ```bash
 mdtk validate data/bars.csv
 ```
+
+Validation reports row counts plus:
+
+- duplicate minute buckets that would collapse during normalization
+- obvious missing business-day gaps for daily datasets
+- symbols whose raw rows arrive out of timestamp order
 
 Normalize a dataset:
 
@@ -76,6 +82,19 @@ mdtk combine data/aapl.csv data/msft.csv data/nvda.csv --output data/portfolio.c
 
 The combined output is sorted by `symbol` and `timestamp`, and exact duplicate rows are rejected.
 
+## End-to-end example
+
+A committed pipeline example lives under
+[`examples/portfolio_pipeline`](/Users/fabrizio/Dev/Finance/market-data-toolkit/examples/portfolio_pipeline/README.md).
+
+It shows a complete workflow:
+
+1. ingest two IBKR-style historical exports
+2. combine the normalized symbol files
+3. validate the resulting portfolio dataset
+4. compute derived features
+5. hand the combined dataset to `backtest-lab`
+
 ## Package usage
 
 ```python
@@ -90,12 +109,14 @@ features = compute_features(normalized)
 
 - `src/market_data_toolkit/` package source
 - `tests/` regression-style test coverage
+- `examples/portfolio_pipeline/` committed end-to-end data workflow example
 - `docs/architecture.md` design notes and data assumptions
 
 ## Limitations
 
 - v0.1.0 is focused on CSV-based OHLCV data
 - Feature generation is intentionally simple and transparent
-- Corporate actions and trading-calendar logic are not included yet
+- Validation includes lightweight daily-session gap checks, not a full exchange calendar
+- Corporate actions are not included yet
 - The IBKR adapter currently targets historical bar exports, not streaming API callbacks
 - Direct IBKR fetching currently assumes stock contracts (`secType=STK`) on the selected exchange

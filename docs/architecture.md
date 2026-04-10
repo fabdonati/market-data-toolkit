@@ -28,13 +28,14 @@ The expected workflow is:
 1. `load_data()` to parse a CSV source
 2. `normalize_bars()` to standardize symbol casing and merge duplicate timestamps
 3. `resample_bars()` when a coarser interval is needed
-4. `compute_features()` to derive downstream analytics fields
+4. `compute_features()` to derive downstream analytics fields such as returns, gap returns, volatility, and drawdown
 
 ## Timestamp assumptions
 
 - Timestamps are parsed with Python's ISO-8601 handling
 - Duplicate timestamps are merged at minute granularity
 - Resampling currently uses timestamp floor bucketing
+- Daily-session validation is intentionally lightweight and uses business-day gaps, not a full exchange calendar
 
 ## CLI design
 
@@ -44,6 +45,7 @@ The CLI mirrors the package API rather than inventing a separate execution model
 - `mdtk ingest`
 - `mdtk features`
 - `mdtk ibkr-ingest`
+- `mdtk combine`
 
 That keeps it easy to verify behavior in tests and reuse the same logic from notebooks or
 other packages.
@@ -70,3 +72,20 @@ result as a normalized CSV that downstream tools can consume without broker-spec
 
 When working with multiple symbols, the toolkit keeps each normalized dataset schema-identical so
 they can be merged deterministically into a single portfolio-ready file for downstream research.
+
+## Validation and feature scope
+
+The current validation/reporting layer is intentionally compact:
+
+- duplicate minute-bucket detection highlights rows that collapse during normalization
+- non-monotonic symbol detection flags raw input ordering problems
+- daily-session gap detection highlights obvious missing business days in daily datasets
+
+Feature generation stays transparent and table-friendly:
+
+- simple returns
+- gap returns
+- rolling mean
+- rolling volatility
+- volume ratio and volume z-score
+- drawdown from the running peak

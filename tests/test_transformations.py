@@ -16,13 +16,14 @@ def sample_bars() -> list[Bar]:
         Bar("AAPL", datetime.fromisoformat("2025-01-02T09:30:55"), 100.5, 102, 100, 101.25, 1200),
         Bar("AAPL", datetime.fromisoformat("2025-01-02T09:31:00"), 101.25, 103, 101, 102, 800),
         Bar("AAPL", datetime.fromisoformat("2025-01-02T09:32:00"), 102, 104, 101.5, 103, 1600),
+        Bar("AAPL", datetime.fromisoformat("2025-01-02T09:33:00"), 103, 105, 102.5, 104, 1200),
     ]
 
 
 def test_normalize_bars_merges_duplicate_minutes(sample_bars: list[Bar]) -> None:
     normalized = normalize_bars(sample_bars)
 
-    assert len(normalized) == 3
+    assert len(normalized) == 4
     assert normalized[0].timestamp == datetime.fromisoformat("2025-01-02T09:30:00")
     assert normalized[0].high == pytest.approx(102.0)
     assert normalized[0].close == pytest.approx(101.25)
@@ -59,3 +60,20 @@ def test_compute_features_generates_rolling_fields(sample_bars: list[Bar]) -> No
     assert feature_rows[2].rolling_mean_3 == pytest.approx((101.25 + 102 + 103) / 3)
     assert feature_rows[2].range_pct == pytest.approx((104 - 101.5) / 102)
     assert feature_rows[2].volume_zscore_3 is not None
+    assert feature_rows[2].gap_return == pytest.approx(0.0)
+    assert feature_rows[2].volume_ratio_3 == pytest.approx(1600 / ((2200 + 800 + 1600) / 3))
+    assert feature_rows[3].rolling_volatility_3 is not None
+    assert feature_rows[3].drawdown_pct == pytest.approx(0.0)
+
+
+def test_compute_features_reports_drawdown_from_running_peak() -> None:
+    bars = [
+        Bar("AAPL", datetime.fromisoformat("2025-01-02T00:00:00"), 100, 101, 99, 100, 1000),
+        Bar("AAPL", datetime.fromisoformat("2025-01-03T00:00:00"), 100, 106, 100, 105, 1000),
+        Bar("AAPL", datetime.fromisoformat("2025-01-06T00:00:00"), 104, 104, 98, 99, 1200),
+    ]
+
+    feature_rows = compute_features(bars)
+
+    assert feature_rows[1].drawdown_pct == pytest.approx(0.0)
+    assert feature_rows[2].drawdown_pct == pytest.approx((99 / 105) - 1.0)

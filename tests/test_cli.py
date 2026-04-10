@@ -34,6 +34,9 @@ def test_validate_command_reports_counts(tmp_path: Path) -> None:
     assert "Validated 3 rows across 1 symbols" in result.stdout
     assert "Normalized row count: 2" in result.stdout
     assert "Window: 2025-01-02 09:30:00 -> 2025-01-02 09:31:00" in result.stdout
+    assert "Duplicate minute buckets: 1" in result.stdout
+    assert "Daily session gaps: 0" in result.stdout
+    assert "Non-monotonic symbols: NONE" in result.stdout
 
 
 
@@ -63,6 +66,10 @@ def test_features_command_writes_feature_csv(tmp_path: Path) -> None:
     assert len(rows) == 2
     assert rows[0]["symbol"] == "AAPL"
     assert rows[1]["rolling_mean_3"] == ""
+    assert "gap_return" in rows[0]
+    assert "rolling_volatility_3" in rows[0]
+    assert "volume_ratio_3" in rows[0]
+    assert "drawdown_pct" in rows[0]
 
 
 def test_ingest_command_writes_normalized_rows(tmp_path: Path) -> None:
