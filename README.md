@@ -88,6 +88,50 @@ It shows a complete workflow:
 4. compute derived features
 5. hand the combined dataset to `backtest-lab`
 
+## How to read the outputs
+
+The main CLI outputs are meant to answer three different research questions:
+
+- `validate`
+  - answers whether the raw file is structurally safe to use
+  - duplicate minute buckets indicate rows that would collapse during normalization
+  - daily session gaps indicate missing business-day coverage in daily data
+  - non-monotonic symbols indicate symbol-level ordering problems in the raw feed
+- `combine`
+  - answers whether separate symbol files have been merged into one portfolio-ready dataset
+  - the output should be sorted by `symbol` and `timestamp`, which is the shape expected by `backtest-lab`
+- `features`
+  - answers whether the dataset is now analysis-ready rather than just normalized
+  - `gap_return` captures open-to-prior-close dislocations
+  - `rolling_volatility_3` gives a short-horizon realized-volatility proxy
+  - `volume_ratio_3` compares current volume to recent average participation
+  - `drawdown_pct` tracks how far price has fallen from its running peak
+
+If you want a quick visual check after feature generation, the feature CSV is already plot-ready.
+For example, this command plots close, rolling volatility, and drawdown from the exported file:
+
+```bash
+python - <<'PY'
+import csv
+from pathlib import Path
+
+source = Path("examples/portfolio_pipeline/features.csv")
+with source.open(newline="", encoding="utf-8") as handle:
+    rows = list(csv.DictReader(handle))
+
+for row in rows[:5]:
+    print(
+        row["symbol"],
+        row["timestamp"],
+        row["close"],
+        row["rolling_volatility_3"],
+        row["drawdown_pct"],
+    )
+PY
+```
+
+That is not a chart yet, but it is the exact shape a notebook or plotting script would consume.
+
 ## Package usage
 
 ```python
