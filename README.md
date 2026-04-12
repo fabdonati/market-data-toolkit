@@ -3,13 +3,6 @@
 `market-data-toolkit` is a lightweight Python package for ingesting, validating, normalizing,
 and enriching OHLCV-style bar data.
 
-## Why this project
-
-Most market-data workflows start with small utility code that quietly becomes critical:
-parsing vendor exports, standardizing timestamps, resampling bars, and generating features
-for downstream models or backtests. This project packages those tasks into a typed API and
-a small CLI.
-
 ## Features
 
 - Load OHLCV data from CSV into typed bar objects
