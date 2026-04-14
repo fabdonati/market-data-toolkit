@@ -88,20 +88,17 @@ It shows a complete workflow:
 4. compute derived features
 5. hand the combined dataset to `backtest-lab`
 
-## How to read the outputs
+## Outputs
 
-The main CLI outputs are meant to answer three different research questions:
+The main CLI outputs are:
 
 - `validate`
-  - answers whether the raw file is structurally safe to use
   - duplicate minute buckets indicate rows that would collapse during normalization
   - daily session gaps indicate missing business-day coverage in daily data
   - non-monotonic symbols indicate symbol-level ordering problems in the raw feed
 - `combine`
-  - answers whether separate symbol files have been merged into one portfolio-ready dataset
   - the output should be sorted by `symbol` and `timestamp`, which is the shape expected by `backtest-lab`
 - `features`
-  - answers whether the dataset is now analysis-ready rather than just normalized
   - `gap_return` captures open-to-prior-close dislocations
   - `rolling_volatility_3` gives a short-horizon realized-volatility proxy
   - `volume_ratio_3` compares current volume to recent average participation
@@ -130,7 +127,7 @@ for row in rows[:5]:
 PY
 ```
 
-That is not a chart yet, but it is the exact shape a notebook or plotting script would consume.
+That output is already in the shape expected by a notebook or plotting script.
 
 ## Package usage
 
@@ -152,7 +149,7 @@ features = compute_features(normalized)
 ## Limitations
 
 - v0.1.0 is focused on CSV-based OHLCV data
-- Feature generation is intentionally simple and transparent
+- Feature generation currently covers a compact set of rolling and return-based features
 - Validation includes lightweight daily-session gap checks, not a full exchange calendar
 - Corporate actions are not included yet
 - The IBKR adapter currently targets historical bar exports, not streaming API callbacks

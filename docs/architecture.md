@@ -18,8 +18,8 @@ The core unit is a `Bar`, a typed dataclass representing one OHLCV observation:
 - `close`
 - `volume`
 
-The loader is intentionally strict about required columns so failures happen close to the
-data source instead of later in the pipeline.
+The loader is strict about required columns so failures happen close to the data source instead
+of later in the pipeline.
 
 ## Transform pipeline
 
@@ -35,7 +35,7 @@ The expected workflow is:
 - Timestamps are parsed with Python's ISO-8601 handling
 - Duplicate timestamps are merged at minute granularity
 - Resampling currently uses timestamp floor bucketing
-- Daily-session validation is intentionally lightweight and uses business-day gaps, not a full exchange calendar
+- Daily-session validation uses business-day gaps, not a full exchange calendar
 
 ## CLI design
 
@@ -75,7 +75,7 @@ they can be merged deterministically into a single portfolio-ready file for down
 
 ## Validation and feature scope
 
-The current validation/reporting layer is intentionally compact:
+The current validation and reporting layer includes:
 
 - duplicate minute-bucket detection highlights rows that collapse during normalization
 - non-monotonic symbol detection flags raw input ordering problems
